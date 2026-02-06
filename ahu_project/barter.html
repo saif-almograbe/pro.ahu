@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>بوابة المقايضة - سوق الحسين</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+        header { background: #006400; color: white; padding: 20px; text-align: center; border-radius: 15px; margin-bottom: 20px; }
+        .barter-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-right: 5px solid #B8860B; }
+        .barter-info { display: flex; justify-content: space-between; align-items: center; }
+        .exchange-icon { font-size: 24px; color: #B8860B; }
+        .add-form { background: white; padding: 20px; border-radius: 15px; margin-bottom: 30px; border: 2px dashed #006400; }
+        input, button { padding: 10px; margin: 5px; border-radius: 8px; border: 1px solid #ddd; }
+        button { background: #006400; color: white; cursor: pointer; border: none; font-weight: bold; }
+    </style>
+</head>
+<div id="chat-icon" onclick="toggleChatBox()" style="position: fixed; top: 20px; right: 20px; width: 60px; height: 60px; background: #075e54; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 30px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9999; border: 2px solid white; display: none;">
+    💬
+</div>
+
+<div id="chat-app-container" style="display: none; position: fixed; top: 90px; right: 20px; width: 320px; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 9998; font-family: sans-serif; text-align: right;">
+    <div style="background: #075e54; color: white; padding: 10px;">
+        <strong>دردشة المقايضة 🔄</strong>
+    </div>
+    <div id="chatWindow" style="height: 250px; background: #e5ddd5; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;"></div>
+    <div style="padding: 10px; display: flex; gap: 5px; background: #f0f0f0;">
+        <input type="text" id="chatInput" placeholder="اكتب عرضك هنا..." style="flex: 1; border: none; padding: 10px; border-radius: 20px;">
+        <button onclick="sendChatMessage()" style="background: #075e54; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer;">➤</button>
+    </div>
+</div>
+<body>
+
+<header>
+    <h1>🔄 نظام المقايضة (بدّل غرض بغرض)</h1>
+    <p>جامعة الحسين بن طلال - منصة التبادل الطلابي</p>
+</header>
+
+<div class="add-form">
+    <h3>عرض غرض للمقايضة:</h3>
+    <input type="text" id="myItem" placeholder="شو الغرض اللي معك؟ (مثلاً: كتاب كالكولاس)">
+    <span class="exchange-icon">⇄</span>
+    <input type="text" id="wantedItem" placeholder="شو بدك بداله؟ (مثلاً: سماعات لابتوب)">
+    <button onclick="addBarter()">انشر العرض</button>
+</div>
+
+<div id="barterList">
+    </div>
+
+<script>
+    // --- أولاً: دوال إدارة عروض المقايضة ---
+    function addBarter() {
+        const myItem = document.getElementById('myItem').value;
+        const wantedItem = document.getElementById('wantedItem').value;
+
+        if(!myItem || !wantedItem) {
+            alert("عبّي الخانتين يا غالي!");
+            return;
+        }
+
+        const barters = JSON.parse(localStorage.getItem('barters')) || [];
+        barters.push({ myItem, wantedItem, user: "طالب حسين" });
+        localStorage.setItem('barters', JSON.stringify(barters));
+        
+        document.getElementById('myItem').value = "";
+        document.getElementById('wantedItem').value = "";
+        loadBarters();
+    }
+
+    function loadBarters() {
+        const list = document.getElementById('barterList');
+        const barters = JSON.parse(localStorage.getItem('barters')) || [];
+        
+        list.innerHTML = "<h3>العروض الحالية:</h3>";
+        
+        barters.forEach((b) => {
+            list.innerHTML += `
+                <div class="barter-card">
+                    <div class="barter-info">
+                        <div>
+                            <strong>معي:</strong> ${b.myItem} <br>
+                            <span style="color: #006400;"><strong>بدي:</strong> ${b.wantedItem}</span>
+                        </div>
+                        <div class="exchange-icon">🔄</div>
+                        <button onclick="startBarterChat('${b.myItem}')" style="background: #B8860B; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer;">تواصل للمقايضة</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // --- ثانياً: كود الدردشة اللي سألت عنه (حطه هون) ---
+    let currentBarterKey = "";
+
+    function startBarterChat(itemName) {
+        currentBarterKey = "chat_barter_" + itemName;
+        document.getElementById('chat-icon').style.display = "flex";
+        document.getElementById('chat-app-container').style.display = "block";
+        loadMessages();
+    }
+
+    function toggleChatBox() {
+        const box = document.getElementById('chat-app-container');
+        box.style.display = (box.style.display === "none") ? "block" : "none";
+    }
+
+    function loadMessages() {
+        const chatWindow = document.getElementById('chatWindow');
+        const messages = JSON.parse(localStorage.getItem(currentBarterKey)) || [];
+        chatWindow.innerHTML = "";
+        messages.forEach(msg => {
+            chatWindow.innerHTML += `
+                <div style="align-self: flex-end; background: #dcf8c6; padding: 8px; border-radius: 10px; max-width: 80%; font-size: 13px; margin-bottom: 5px;">
+                    ${msg.text}
+                </div>`;
+        });
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    function sendChatMessage() {
+        const input = document.getElementById('chatInput');
+        if (input.value.trim() === "") return;
+
+        const messages = JSON.parse(localStorage.getItem(currentBarterKey)) || [];
+        messages.push({ text: input.value });
+        localStorage.setItem(currentBarterKey, JSON.stringify(messages));
+        
+        input.value = "";
+        loadMessages();
+    }
+
+    window.onload = loadBarters;
+</script>
+
+
+
+
+<a href="home.html" style="
+    display: inline-block;
+    margin-bottom: 15px;
+    text-decoration: none;
+    color: #006400;
+    font-weight: bold;
+    font-size: 16px;
+    background: white;
+    padding: 8px 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+">
+    ← العودة للسوق الرئيسي
+</a>
+<button onclick="window.location.href='home.html'" style="
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #ffffff;
+    color: #006400;
+    border: 2px solid #006400;
+    padding: 10px 15px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    z-index: 1000;
+">
+    🏠 الرئيسية
+</button>
+
+
+</body>
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>سوق الحسين - الرئيسية</title>
+    <style>
+        /* التنسيق الأصلي المرتب */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f4f4; margin: 0; transition: 0.3s; }
+        header { background: #006400; color: white; padding: 10px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; }
+        .search-bar input { padding: 8px; border-radius: 5px; border: none; width: 250px; }
+        
+        .categories { background: white; padding: 10px; display: flex; justify-content: center; gap: 10px; border-bottom: 1px solid #ddd; }
+        .categories button { border: 1px solid #006400; background: none; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        .categories button:hover { background: #006400; color: white; }
+
+        .container { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 20px; }
+        .product-card { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: 0.3s; cursor: pointer; border-bottom: 3px solid #B8860B; }
+        .product-card:hover { transform: translateY(-5px); }
+        .product-info { padding: 15px; text-align: center; }
+        .product-price { color: #006400; font-weight: bold; font-size: 18px; }
+        
+        /* الوضع الليلي */
+        body.dark-mode { background: #1a1a1a; color: white; }
+        .dark-mode .product-card { background: #2d2d2d; color: white; }
+        .dark-mode .categories { background: #333; }
+
+        /* التنبيهات */
+        .toast-notification { position: fixed; bottom: 20px; right: -300px; background: white; color: #333; padding: 15px 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-right: 5px solid #B8860B; transition: 0.5s; z-index: 9999; }
+        .toast-notification.show { right: 20px; }
+
+        /* الشات */
+        .chat-icon { position: fixed; bottom: 20px; left: 20px; background: #006400; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; cursor: pointer; z-index: 1000; }
+        .chat-window { position: fixed; bottom: 90px; left: 20px; width: 300px; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); display: none; flex-direction: column; overflow: hidden; z-index: 1000; border: 1px solid #ddd; }
+   
+        /*  أيقونة الرسائل */ 
+    .toast-msg {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    z-index: 10000;
+    display: none;
+    animation: fadeInUp 0.5s, fadeOutDown 0.5s 2.5s;
+    border-bottom: 3px solid #B8860B;
+}
+
+@keyframes fadeInUp { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+@keyframes fadeOutDown { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+    
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">سوق الحسين 🎓</div>
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="ابحث عن منتج...">
+        
+    </div>
+    <div class="wishlist-icon" onclick="window.location.href='wishlist.html'">
+    ❤️ <span class="wishlist-count" id="wishlist-count">0</span>
+</div>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <button id="dark-mode-toggle" style="background: #B8860B; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer;">🌙</button>
+        <a href="add-product.html" style="background: white; color: #006400; padding: 8px; border-radius: 5px; text-decoration: none; font-weight: bold;">+ أضف</a>
+        <a href="profile.html" style="color: white; text-decoration: none; font-weight: bold;">👤 الملف الشخصي</a>
+        <button onclick="logout()" style="background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold;">خروج</button>
+    </div>
+    
+</header>
+
+<div class="categories">
+    <button onclick="displayProducts('', 'الكل')">الكل</button>
+    <button onclick="displayProducts('', 'كتب')">كتب</button>
+    <button onclick="displayProducts('', 'أدوات')">أدوات</button>
+    <button onclick="displayProducts('', 'إلكترونيات')">إلكترونيات</button>
+    <button onclick="displayProducts('', 'اثاث')">اثاث</button>
+
+    <a href="barter.html" style="background: #B8860B; color: white; padding: 10px 20px; border-radius: 20px; text-decoration: none; font-weight: bold;">🔄 بوابة المقايضة</a>
+</div>
+
+<div class="container" id="products-grid"></div>
+
+<div class="chat-icon" onclick="toggleChat()">🤖</div>
+
+<div class="chat-window" id="chatWindow">
+    <div style="background: #006400; color: white; padding: 15px; font-weight: bold; text-align: center;">مساعد الحسين الذكي</div>
+    <div id="chatBody" style="height: 250px; padding: 10px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; font-size: 14px;">
+        <div style="background:#eee; padding:8px; border-radius:10px; margin-bottom:10px; align-self: flex-start;">أهلاً بك! أنا مرتبطة بـ API الجامعة.. كيف أساعدك؟</div>
+    </div>
+    <div style="display: flex; padding: 10px; border-top: 1px solid #eee;">
+        <input type="text" id="chatInput" placeholder="اسألني..." style="flex: 1; border: 1px solid #ddd; padding: 8px; border-radius: 5px;">
+        <button onclick="sendBotMessage()" style="background: #006400; color: white; border: none; padding: 8px; margin-right: 5px; border-radius: 5px;">إرسال</button>
+    </div>
+</div>
+
+<script>
+    // 1. حماية الصفحة
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+        window.location.href = "index.html";
+    }
+
+    // 2. البيانات
+    function getProducts() {
+        const baseProducts = [
+            { name: "كتاب فيزياء 101", price: "5.00", phone: "962770000000", category: "كتب", img: "https://cdn-icons-png.flaticon.com/512/3429/3429149.png" },
+            { name: "طقم هندسة T-Square", price: "12.00", phone: "962770000000", category: "أدوات", img: "https://cdn-icons-png.flaticon.com/512/3260/3260170.png" },
+            { name: "آلة حاسبة Casio", price: "25.00", phone: "962770000000", category: "أدوات", img: "https://cdn-icons-png.flaticon.com/512/2344/2344132.png" }
+        ];
+        const userProducts = JSON.parse(localStorage.getItem('userProducts')) || [];
+        return [...baseProducts, ...userProducts];
+    }
+
+    // 3. دالة الانتقال (الجذعية)
+    function goToDetails(name, price, img, phone) {
+        localStorage.setItem('p_name', name);
+        localStorage.setItem('p_price', price);
+        localStorage.setItem('p_img', img);
+        localStorage.setItem('p_phone', phone);
+        window.location.href = "product-details.html";
+    }
+
+    // 4. دالة العرض
+    
+    function displayProducts(filterText = "", category = "الكل") {
+    const grid = document.getElementById('products-grid');
+    grid.innerHTML = "";
+    const allProducts = getProducts();
+
+    allProducts.forEach(product => {
+        const matchSearch = product.name.toLowerCase().includes(filterText.toLowerCase());
+        const matchCategory = (category === "الكل" || product.category === category);
+
+        if (matchSearch && matchCategory) {
+            grid.innerHTML += `
+                <div class="product-card" style="position:relative;">
+                    
+                    <button onclick="toggleWishlist(event, '${product.name}')" style="position:absolute; top:10px; left:10px; z-index:10; background:white; border:none; border-radius:50%; width:30px; height:30px; cursor:pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">❤️</button>
+
+                    <div onclick="goToDetails('${product.name}', '${product.price}', '${product.img}', '${product.phone}')">
+                        <div style="height: 150px; background: white; display: flex; align-items: center; justify-content: center;">
+                            <img src="${product.img}" style="max-height: 80%; max-width: 80%;">
+                        </div>
+                        <div class="product-info">
+                            <h3>${product.name}</h3>
+                            <p class="product-price">${product.price} دينار</p>
+                            <button class="view-btn" style="background:#006400; color:white; border:none; padding:8px; border-radius:5px; width:100%; cursor:pointer;">عرض التفاصيل</button>
+                        </div>
+                    </div>
+                </div>`;
+        }
+    });
+}
+    // 5. البحث والدارك مود والخروج
+    document.getElementById('searchInput').addEventListener('input', (e) => displayProducts(e.target.value));
+    document.getElementById('dark-mode-toggle').onclick = () => document.body.classList.toggle('dark-mode');
+    function logout() { if(confirm("هل تريد الخروج؟")) { localStorage.setItem("isLoggedIn", "false"); window.location.href = "index.html"; } }
+
+    // 6. البوت
+    function toggleChat() {
+        const win = document.getElementById('chatWindow');
+        win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    function sendBotMessage() {
+        const input = document.getElementById('chatInput');
+        const body = document.getElementById('chatBody');
+        const msg = input.value.trim().toLowerCase();
+        if(!msg) return;
+
+        body.innerHTML += `<div style="align-self: flex-end; background: #006400; color: white; padding: 8px; border-radius: 10px; margin-bottom: 10px;">${msg}</div>`;
+        input.value = "";
+
+        setTimeout(() => {
+            const all = getProducts();
+            const found = all.filter(p => p.name.toLowerCase().includes(msg) || p.price.toString() === msg);
+            let reply = found.length > 0 ? `لقيت لك: ${found.map(f => f.name).join(" و ")}` : "لم أجد نتائج حالياً.";
+            if(msg.includes("مكتبة")) reply = "📡 جاري البحث في API مكتبة الجامعة...";
+            
+            body.innerHTML += `<div style="align-self: flex-start; background: #eee; padding: 8px; border-radius: 10px; margin-bottom: 10px; border-right: 4px solid #B8860B;">${reply}</div>`;
+            body.scrollTop = body.scrollHeight;
+        }, 700);
+    }
+
+    // تشغيل التنبيهات العشوائية
+    const notifications = ["🛒 منتج جديد مضاف الآن", "🔥 قسم الكتب عليه ضغط كبير", "✅ تم بيع منتج بنجاح"];
+    setInterval(() => {
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification';
+        toast.innerText = notifications[Math.floor(Math.random() * notifications.length)];
+        document.body.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 100);
+        setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 500); }, 4000);
+    }, 20000);
+
+    displayProducts(); // تشغيل أولي
+</script>
+
+<style>
+/* أيقونة المفضلة في الهيدر */
+.wishlist-icon { position: relative; cursor: pointer; font-size: 20px; }
+.wishlist-count { 
+    position: absolute; top: -10px; right: -10px; 
+    background: #ff4d4d; color: white; border-radius: 50%; 
+    padding: 2px 6px; font-size: 10px; font-weight: bold; 
+}
+
+/* زر القلب على الكرت */
+.heart-btn {
+    position: absolute; top: 10px; left: 10px;
+    background: white; border: none; border-radius: 50%;
+    width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: 0.3s; z-index: 10;
+}
+.heart-btn.active { color: #ff4d4d; transform: scale(1.2); }</style>
+
+
+
+<script>
+function toggleWishlist(event, productName) {
+    event.stopPropagation(); // منع الانتقال لصفحة التفاصيل عند ضغط القلب
+    let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+    
+    if (wishlist.includes(productName)) {
+        wishlist = wishlist.filter(name => name !== productName);
+    } else {
+        wishlist.push(productName);
+    }
+    
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    updateWishlistCount();
+}
+
+function updateWishlistCount() {
+    const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+    document.getElementById('wishlist-count').innerText = wishlist.length;
+}
+
+// نادِ الدالة عند التحميل
+updateWishlistCount();
+</script>
+
+
+
+<script>
+function toggleWishlist(event, productName) {
+    event.stopPropagation(); // يمنع فتح صفحة التفاصيل
+    let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+    
+    if (wishlist.includes(productName)) {
+        wishlist = wishlist.filter(name => name !== productName);
+        showToast("❌ تمت الإزالة من المفضلة"); // الرسالة الذكية
+    } else {
+        wishlist.push(productName);
+        showToast("❤️ تمت الإضافة للمفضلة"); // الرسالة الذكية
+    }
+    
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    updateWishlistCount();
+}
+</script>
+
+
+
+<div id="toast" style="display: none; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 12px 25px; border-radius: 30px; z-index: 10000; box-shadow: 0 5px 15px rgba(0,0,0,0.3); border-bottom: 3px solid #B8860B; font-weight: bold; transition: 0.5s;"></div>
+
+<script>
+// دالة المحرك اللي بتشغل الرسالة
+function showToast(text) {
+    const toast = document.getElementById('toast');
+    toast.innerText = text;
+    toast.style.display = 'block';
+    
+    // تختفي تلقائياً بعد ثانيتين
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 2000);
+}
+</script>
+
+
+
+
+
+
+
+<!-- 
+/* --- تنسيق خاص بصفحة المفضلة --- 
+
+
+<div id="chat-system" style="max-width: 400px; margin: 20px auto; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.2); font-family: sans-serif;">
+    <div style="background: #075e54; color: white; padding: 10px 15px; display: flex; align-items: center; gap: 10px;">
+        <div style="width: 10px; height: 10px; background: #25d366; border-radius: 50%;"></div>
+        <strong>دردشة سوق الحسين (مباشر)</strong>
+    </div>
+
+    <div id="chatWindow" style="height: 200px; background: #e5ddd5; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+        </div>
+
+    <div style="background: #f0f0f0; padding: 10px; display: flex; gap: 5px;">
+        <input type="text" id="chatInput" placeholder="اكتب رسالتك..." style="flex: 1; border: none; padding: 10px; border-radius: 20px; outline: none;">
+        <button onclick="sendMessage()" style="background: #075e54; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer;">➤</button>
+    </div>
+</div>
+
+<script>// اسم المنتج الحالي عشان نفصل محادثات كل منتج عن الثاني
+const currentProductName = localStorage.getItem('p_name') || "عام";
+
+function loadMessages() {
+    const chatWindow = document.getElementById('chatWindow');
+    // جلب الرسائل المخزنة لهذا المنتج
+    const messages = JSON.parse(localStorage.getItem('chat_' + currentProductName)) || [];
+    
+    chatWindow.innerHTML = "";
+    messages.forEach(msg => {
+        const isMe = msg.sender === "أنا";
+        chatWindow.innerHTML += `
+            <div style="align-self: ${isMe ? 'flex-end' : 'flex-start'}; 
+                        background: ${isMe ? '#dcf8c6' : 'white'}; 
+                        padding: 8px 12px; 
+                        border-radius: 10px; 
+                        max-width: 80%; 
+                        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                        position: relative;">
+                <p style="margin: 0; font-size: 14px;">${msg.text}</p>
+                <small style="font-size: 10px; color: gray; display: block; text-align: left; margin-top: 3px;">${msg.time}</small>
+            </div>
+        `;
+    });
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+function sendMessage() {
+    const input = document.getElementById('chatInput');
+    if (input.value.trim() === "") return;
+
+    const messages = JSON.parse(localStorage.getItem('chat_' + currentProductName)) || [];
+    const now = new Date();
+    const time = now.getHours() + ":" + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+
+    const newMsg = {
+        text: input.value,
+        sender: "أنا", // في النسخة المتقدمة بنحط اسم الطالب
+        time: time
+    };
+
+    messages.push(newMsg);
+    localStorage.setItem('chat_' + currentProductName, JSON.stringify(messages));
+    
+    input.value = "";
+    loadMessages(); // تحديث الشاشة
+}
+
+// تشغيل الشات بمجرد فتح الصفحة
+window.addEventListener('load', loadMessages);
+</script> */*
+ -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

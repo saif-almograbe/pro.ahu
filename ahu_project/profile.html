@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>الملف الشخصي - سيف المغربي</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+        .profile-container { max-width: 600px; margin: auto; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .profile-header { background: #006400; color: white; padding: 40px 20px; text-align: center; position: relative; }
+        .profile-pic { width: 100px; height: 100px; background: #B8860B; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 15px; border: 4px solid white; }
+        .info-section { padding: 20px; }
+        .info-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .stats { display: flex; justify-content: space-around; padding: 20px; background: #f9f9f9; text-align: center; }
+        .back-btn { display: block; text-align: center; margin-top: 20px; padding: 10px; background: #006400; color: white; text-decoration: none; border-radius: 5px; }
+         
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+        header { background: #006400; color: white; padding: 15px; text-align: center; border-radius: 10px; margin-bottom: 20px; position: relative; }
+        .back { position: absolute; right: 20px; top: 20px; color: white; text-decoration: none; font-weight: bold; }
+        
+        .stats-container { display: flex; gap: 20px; justify-content: center; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; width: 150px; border-top: 5px solid #B8860B; }
+        .stat-card h2 { margin: 0; color: #006400; }
+
+        .my-products { background: white; padding: 20px; border-radius: 15px; max-width: 800px; margin: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .product-item { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #eee; padding: 10px 0; }
+        .product-item img { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; }
+        .delete-btn { background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+    
+   </style>
+</head>
+<header>
+    <a href="home.html" class="back">← العودة للسوق</a>
+    <h1>لوحة التحكم الشخصية 👤</h1>
+</header>
+<body>
+
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-pic">👤</div>
+        <h2>سيف المغربي</h2>
+        <p>طالب في جامعة الحسين بن طلال</p>
+    </div>
+
+    <div class="stats">
+        <div><strong>3</strong><br><small>منتجات معروضة</small></div>
+        <div><strong>12</strong><br><small>عملية بيع</small></div>
+        <div><strong>⭐ 4.9</strong><br><small>تقييم</small></div>
+    </div>
+
+    <div class="info-section">
+        <div class="info-item"><span>الإيميل الجامعي:</span> <span>saif@ahu.edu.jo</span></div>
+        <div class="info-item"><span>التخصص:</span> <span>تكنولوجيا المعلومات</span></div>
+        <div class="info-item"><span>تاريخ الانضمام:</span> <span>يناير 2026</span></div>
+    </div>
+    <div style="margin-top: 20px; padding: 15px; border: 1px dashed #B8860B; border-radius: 10px; background: #fffdf5;">
+    <p style="font-size: 13px; color: #888; margin-bottom: 5px;">خاص بإدارة الموقع (سيف):</p>
+    <a href="admin.html" style="background: #B8860B; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; display: inline-block;">
+        👑 دخول لوحة تحكم القائد
+    </a>
+</div>
+
+
+
+    <a href="home.html" class="back-btn">العودة إلى السوق</a>
+</div>
+
+</body>
+</html>
+
+
+<hr style="margin: 40px 0; border: none; border-top: 4px solid #f8e000;">
+
+
+
+<div class="stats-container">
+    <div class="stat-card">
+        <p>منتجاتي</p>
+        <h2 id="myProductsCount">0</h2>
+    </div>
+    <div class="stat-card">
+        <p>في المفضلة</p>
+        <h2 id="wishlistCount">0</h2>
+    </div>
+</div>
+
+<div class="my-products">
+    <h3>إدارة إعلاناتي:</h3>
+    <div id="myProductsList">
+        <p style="text-align: center; color: gray;">لم تقم بإضافة أي منتجات بعد.</p>
+    </div>
+</div>
+
+<script>
+    function loadProfileData() {
+        // 1. جلب البيانات
+        const userProducts = JSON.parse(localStorage.getItem('userProducts')) || [];
+        const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+
+        // 2. تحديث الإحصائيات
+        document.getElementById('myProductsCount').innerText = userProducts.length;
+        document.getElementById('wishlistCount').innerText = wishlist.length;
+
+        // 3. عرض منتجات المستخدم لإدارتها
+        const listDiv = document.getElementById('myProductsList');
+        if (userProducts.length > 0) {
+            listDiv.innerHTML = "";
+            userProducts.forEach((p, index) => {
+                listDiv.innerHTML += `
+                    <div class="product-item">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <img src="${p.img}">
+                            <div>
+                                <strong>${p.name}</strong><br>
+                                <small>${p.price} دينار</small>
+                            </div>
+                        </div>
+                        <button class="delete-btn" onclick="deleteMyProduct(${index})">حذف الإعلان 🗑️</button>
+                    </div>
+                `;
+            });
+        }
+    }
+
+    // دالة لتعديل المنتج
+function editProduct(index) {
+    let userProducts = JSON.parse(localStorage.getItem('userProducts')) || [];
+    let p = userProducts[index];
+
+    // طلب البيانات الجديدة من المستخدم عبر Prompt (طريقة سريعة وفعالة)
+    let newName = prompt("تعديل اسم المنتج:", p.name);
+    let newPrice = prompt("تعديل السعر:", p.price);
+    let newPhone = prompt("تعديل رقم الهاتف:", p.phone);
+
+    if (newName && newPrice && newPhone) {
+        // تحديث البيانات في المصفوفة
+        userProducts[index].name = newName;
+        userProducts[index].price = newPrice;
+        userProducts[index].phone = newPhone;
+
+        // حفظ التعديلات في الذاكرة
+        localStorage.setItem('userProducts', JSON.stringify(userProducts));
+        
+        // إعادة تحميل البيانات في الصفحة
+        loadProfileData();
+        alert("✅ تم تحديث الإعلان بنجاح!");
+    }
+}
+
+// تعديل دالة العرض لتشمل زر التعديل
+function loadProfileData() {
+    const userProducts = JSON.parse(localStorage.getItem('userProducts')) || [];
+    const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+
+    document.getElementById('myProductsCount').innerText = userProducts.length;
+    document.getElementById('wishlistCount').innerText = wishlist.length;
+
+    const listDiv = document.getElementById('myProductsList');
+    if (userProducts.length > 0) {
+        listDiv.innerHTML = "";
+        userProducts.forEach((p, index) => {
+            listDiv.innerHTML += `
+                <div class="product-item" style="border-bottom: 1px solid #eee; padding: 10px 0; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <img src="${p.img}" style="width:50px; height:50px; border-radius:5px;">
+                        <div>
+                            <strong>${p.name}</strong><br>
+                            <small>${p.price} دينار</small>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 5px;">
+                        <button onclick="editProduct(${index})" style="background: #B8860B; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">تعديل ✏️</button>
+                        <button onclick="deleteMyProduct(${index})" style="background: #ff4d4d; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">حذف 🗑️</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    }
+
+    // التشغيل عند الفتح
+    window.onload = loadProfileData;
+</script>
+<script>
+    
+</script>
+
+</body>
+</html>

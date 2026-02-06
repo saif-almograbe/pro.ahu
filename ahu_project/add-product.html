@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة إعلان - سوق الحسين</title>
+    <style>
+        /* خلفية احترافية متدرجة */
+        body { 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            background: linear-gradient(135deg, #006400 0%, #004d00 100%); 
+            margin: 0; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* كرت الإضافة الاحترافي */
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.95); 
+            width: 100%; 
+            max-width: 450px; 
+            padding: 40px; 
+            border-radius: 25px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2); 
+            position: relative;
+            margin: 20px;
+        }
+
+        h2 { color: #006400; margin-top: 0; font-size: 24px; border-bottom: 3px solid #B8860B; display: inline-block; padding-bottom: 5px; }
+
+        .input-group { text-align: right; margin-bottom: 15px; }
+        
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; font-size: 14px; }
+
+        input, select { 
+            width: 100%; 
+            padding: 12px 15px; 
+            border: 2px solid #eee; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            transition: 0.3s; 
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        input:focus, select:focus { border-color: #006400; box-shadow: 0 0 8px rgba(0,100,0,0.1); }
+
+        /* ستايل زر الرفع (الملفات) */
+        .file-upload { 
+            border: 2px dashed #B8860B; 
+            padding: 20px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            background: #fff9f0; 
+            transition: 0.3s; 
+        }
+        .file-upload:hover { background: #fff2e0; }
+
+        button { 
+            width: 100%; 
+            padding: 15px; 
+            background: #006400; 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 18px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            margin-top: 20px;
+        }
+        button:hover { background: #004d00; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+
+        .preview-img { width: 100%; max-height: 150px; object-fit: contain; border-radius: 10px; margin-top: 10px; display: none; }
+
+        .back-btn { 
+            position: absolute; 
+            top: 10px; 
+            right: 20px; 
+            text-decoration: none; 
+            color: #ff0000; 
+            font-weight: bold; 
+            font-size: 30px; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glass-card">
+        <a href="home.html" class="back-btn" title="العودة للرئيسية">✕</a>
+        <h2 style="margin-right: 125px;">      نشر إعلان جديد 🚀</h2>
+        <p style="color: #666; font-size: 14px; margin-bottom: 25px;">املأ البيانات ليظهر منتجك لطلاب جامعة الحسين</p>
+
+        <form id="productForm">
+            <div class="input-group">
+                <label>ماذا تبيع؟</label>
+                <input type="text" id="name" placeholder="اسم المنتج..." required>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <div class="input-group" style="flex: 1;">
+                    <label>السعر (دينار)</label>
+                    <input type="number" id="price" placeholder="0.00" required>
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label>القسم</label>
+                    <select id="category">
+                        <option value="كتب">كتب</option>
+                        <option value="أدوات">أدوات</option>
+                        <option value="إلكترونيات">إلكترونيات</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>صورة المنتج</label>
+                <div class="file-upload" onclick="document.getElementById('imgFile').click()">
+                    <span id="file-text">📸 اضغط هنا لاختيار صورة</span>
+                    <input type="file" id="imgFile" accept="image/*" style="display: none;" required>
+                    <img id="imagePreview" class="preview-img">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>رقم الواتساب</label>
+                <input type="text" id="phone" placeholder="962770000000" required>
+            </div>
+
+            <button type="submit">تأكيد ونشر الإعلان ✅</button>
+        </form>
+    </div>
+
+    <script>
+        const imgInput = document.getElementById('imgFile');
+        const preview = document.getElementById('imagePreview');
+        const fileText = document.getElementById('file-text');
+        let base64Image = "";
+
+        imgInput.onchange = function() {
+            const file = imgInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                base64Image = e.target.result;
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                fileText.style.display = 'none';
+            };
+            if (file) { reader.readAsDataURL(file); }
+        };
+
+        document.getElementById('productForm').onsubmit = function(e) {
+            e.preventDefault();
+            const newProduct = {
+                name: document.getElementById('name').value,
+                price: document.getElementById('price').value,
+                category: document.getElementById('category').value,
+                phone: document.getElementById('phone').value,
+                img: base64Image
+            };
+            let products = JSON.parse(localStorage.getItem('userProducts')) || [];
+            products.push(newProduct);
+            localStorage.setItem('userProducts', JSON.stringify(products));
+            alert("تم النشر بنجاح يا سيف!");
+            window.location.href = "home.html";
+        };
+    </script>
+</body>
+</html>

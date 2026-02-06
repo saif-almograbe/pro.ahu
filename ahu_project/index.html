@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - سوق الحسين</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #006400, #B8860B);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0;
+        }
+        .login-card {
+            background: white; padding: 40px; border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 100%; max-width: 400px; text-align: center;
+        }
+        .login-card h2 { color: #006400; margin-bottom: 20px; }
+        input {
+            width: 100%; padding: 12px; margin: 10px 0;
+            border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;
+        }
+        button {
+            width: 100%; padding: 12px; background: #006400; color: white;
+            border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold;
+        }
+        button:hover { background: #004d00; }
+        .footer-text { margin-top: 20px; font-size: 12px; color: #777; }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <h2>سوق جامعة الحسين 🎓</h2>
+        <p>سجل دخولك باستخدام الإيميل الجامعي</p>
+        
+        <form id="loginForm">
+            <input type="email" placeholder="example@st.ahu.edu.jo" required id="email"value="@st.ahu.edu.jo" class="login-input">
+            <input type="password" placeholder="كلمة المرور" required id="password">
+            <button type="submit">دخول</button>
+
+        </form>
+
+        <div class="footer-text">
+            تطوير فريق: سيف، إبراهيم، وسيم، أبو الرائد، عمر
+        </div>
+    </div>
+
+    <script>
+    document.getElementById('loginForm').onsubmit = function(e) {
+        e.preventDefault();
+        let email = document.getElementById('email').value;
+
+        if(!email.endsWith('@st.ahu.edu.jo')) {
+            alert('عذراً، هذا الموقع مخصص لطلاب جامعة الحسين فقط');
+        } else {
+            // هاد السطر هو اللي بيعمل "المفتاح" في المتصفح
+            localStorage.setItem("isLoggedIn", "true"); 
+            alert('أهلاً بك يا قائد! جاري الانتقال للسوق...');
+            window.location.href = "home.html"; 
+        }
+    };
+</script>
+
+</body>
+</html>
